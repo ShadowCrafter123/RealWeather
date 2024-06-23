@@ -37,11 +37,6 @@ class WeatherViewModel : ViewModel(){
             catch (e : Exception){
                 _weatherResult.value = NetworkResponse.Error("Failed to load data")
             }
-
-
         }
-
     }
-
-
 }

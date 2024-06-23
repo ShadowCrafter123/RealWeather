@@ -1,6 +1,7 @@
 package com.example.realweather
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
@@ -28,9 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -65,13 +64,14 @@ fun WeatherPage(viewModel: WeatherViewModel) {
             OutlinedTextField(value = city,
                 modifier = Modifier.weight(1f),
                 onValueChange = {
-                city = it
-            },
+                    city = it
+                },
                 label = {
                     Text(text = "Search for any location")
-                }
+                },
+                shape = RoundedCornerShape(12.dp),
             )
-            
+
             IconButton(onClick = {
                 viewModel.getData(city)
                 keyboardController?.hide()
@@ -86,7 +86,13 @@ fun WeatherPage(viewModel: WeatherViewModel) {
                 Text(text = result.message)
             }
             NetworkResponse.Loading -> {
-                CircularProgressIndicator()
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(80.dp))
+                }
             }
             is NetworkResponse.Success -> {
                 WeatherDetails(data = result.data)
@@ -104,35 +110,43 @@ fun WeatherDetails(data : WeatherModel) {
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        Row (
+        Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.Bottom
-        ){
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
                 imageVector = Icons.Default.LocationOn,
                 contentDescription = "Location Icon",
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(end = 8.dp)
             )
-            
-            Text(text = data.location.name, fontSize = 30.sp)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = data.location.country, fontSize = 18.sp, color = Color.Gray)
+
+            Column {
+                Text(text = data.location.name, fontSize = 30.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = data.location.country, fontSize = 18.sp, color = Color.Gray)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Local Time: ${data.location.localtime.split(" ")[1]}", fontSize = 16.sp, color = Color.Gray)
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        
+
+
+
+        AsyncImage(
+            modifier = Modifier.size(300.dp),
+            model = "https:${data.current.condition.icon}".replace("64x64","128x128"),
+            contentDescription = "Condition icon"
+        )
+
         Text(
             text = "${data.current.temp_c} °C",
             fontSize = 56.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
-        )
-
-        AsyncImage(
-            modifier = Modifier.size(160.dp),
-            model = "https:${data.current.condition.icon}".replace("64x64","128x128"),
-            contentDescription = "Condition icon"
         )
 
         Text(
@@ -161,15 +175,15 @@ fun WeatherDetails(data : WeatherModel) {
                     horizontalArrangement = Arrangement.SpaceAround
                 ){
                     WeatherKeyVal("UV", data.current.uv)
-                    WeatherKeyVal("Participation", data.current.precip_mm)
+                    WeatherKeyVal("Precipitation", data.current.precip_mm)
                 }
 
                 Row (
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ){
-                    WeatherKeyVal("Local Time", data.location.localtime.split(" ")[1])
                     WeatherKeyVal("Latitude", data.location.lat)
+                    WeatherKeyVal("Longitude", data.location.lon)
                 }
             }
         }
@@ -183,6 +197,6 @@ fun WeatherKeyVal(key : String, value : String) {
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         Text(text = value, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Text(text = key, fontWeight = FontWeight.SemiBold, color = Color.Gray)
+        Text(text = key, fontWeight = FontWeight.SemiBold, color = Color.Black)
     }
 }

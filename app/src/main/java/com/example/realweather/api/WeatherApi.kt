@@ -12,3 +12,5 @@ interface WeatherApi {
         @Query("q") city: String
     ): Response<WeatherModel>
 }
+
+// Response é uma classe da biblioteca Retrofit que guarda a resposta HTTP recebida do servidor.
